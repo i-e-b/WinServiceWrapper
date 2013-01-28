@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DummyApp", "src\DummyApp\Du
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinServiceWrapper.Integration_ExternalStop.Tests", "src\WinServiceWrapper.Integration_ExternalStop.Tests\WinServiceWrapper.Integration_ExternalStop.Tests.csproj", "{D24971C3-FEE9-4C66-856F-02D60762A98A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinServiceWrapper.Integration_RestartIfFailed.Tests", "src\WinServiceWrapper.Integration_RestartIfFailed.Tests\WinServiceWrapper.Integration_RestartIfFailed.Tests.csproj", "{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D24971C3-FEE9-4C66-856F-02D60762A98A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D24971C3-FEE9-4C66-856F-02D60762A98A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D24971C3-FEE9-4C66-856F-02D60762A98A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,5 +47,6 @@ Global
 		{53AF69B5-28B8-4832-93FB-EB8D64222129} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
 		{05DF30A8-3D39-4F77-B2CA-6BA4D95F13AA} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
 		{D24971C3-FEE9-4C66-856F-02D60762A98A} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
+		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
 	EndGlobalSection
 EndGlobal

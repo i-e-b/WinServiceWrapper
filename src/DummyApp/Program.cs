@@ -36,6 +36,7 @@ namespace DummyApp
 		static void KillAllInstances()
 		{
 			var me = Process.GetCurrentProcess().Id;
+			File.AppendAllText(_fileName, "\r\nI am " + Process.GetCurrentProcess().ProcessName);
 			var all = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
 			foreach (var process in all.Where(process => process.Id != me))
 			{

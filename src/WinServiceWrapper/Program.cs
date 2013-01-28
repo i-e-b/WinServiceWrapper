@@ -37,11 +37,12 @@ namespace WinServiceWrapper
 					s.WhenStopped(tc => tc.Stop());
 					s.WhenPaused(tc => tc.Pause());
 					s.WhenContinued(tc => tc.Continue());
+
 				});
 				x.RunAsLocalSystem();
 
 				x.EnablePauseAndContinue();
-				x.EnableShutdown();
+				x.EnableServiceRecovery(sr => sr.RestartService(0));
 
 				x.SetDisplayName(name);
 				x.SetServiceName(safeName);
@@ -65,7 +66,7 @@ namespace WinServiceWrapper
 		readonly string _target;
 		readonly string _startArgs;
 		readonly string _pauseArgs;
-		Process _host;
+		Process _childProcess;
 		readonly string _continueArgs;
 		readonly string _stopArgs;
 
@@ -80,14 +81,21 @@ namespace WinServiceWrapper
 
 		public void Start()
 		{
-			_host = Process.Start(new ProcessStartInfo
+			_childProcess = Process.Start(new ProcessStartInfo
 			{
 				FileName = Path.GetFullPath(_target),
 				Arguments = _startArgs,
 				WorkingDirectory = Directory.GetCurrentDirectory(),
 				UseShellExecute = false,
-				RedirectStandardInput = true
+				RedirectStandardInput = true,
 			});
+			_childProcess.EnableRaisingEvents = true;
+			_childProcess.Exited += ChildProcessDied;
+		}
+
+		void ChildProcessDied(object sender, EventArgs e)
+		{
+			Environment.Exit(_childProcess.ExitCode);
 		}
 
 		public void Stop()
@@ -105,9 +113,9 @@ namespace WinServiceWrapper
 
 		void DirectStop()
 		{
-			_host.StandardInput.Write("\x3");
-			_host.StandardInput.Flush();
-			_host.StandardInput.Close();
+			_childProcess.StandardInput.Write("\x3");
+			_childProcess.StandardInput.Flush();
+			_childProcess.StandardInput.Close();
 			WaitForExit_ForceKillAfterTenSeconds();
 		}
 
@@ -123,9 +131,9 @@ namespace WinServiceWrapper
 
 		void WaitForExit_ForceKillAfterTenSeconds()
 		{
-			if (!_host.WaitForExit(10000))
+			if (!_childProcess.WaitForExit(10000))
 			{
-				_host.Kill();
+				_childProcess.Kill();
 			}
 		}
 

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.ServiceProcess;
-using System.Threading;
 using NUnit.Framework;
 
 namespace WinServiceWrapper.Integration.Tests
@@ -19,12 +16,10 @@ namespace WinServiceWrapper.Integration.Tests
 			_fileName = "dummyout.txt";
 			if (File.Exists(_fileName)) File.Delete(_fileName);
 			Call("WinServiceWrapper.exe", "install start");
-			var service = new ServiceController("MyAppsServiceName");
-			service.WaitForStatus(ServiceControllerStatus.Running);
-			service.Pause();
-			service.WaitForStatus(ServiceControllerStatus.Paused);
-			service.Continue();
-			service.WaitForStatus(ServiceControllerStatus.Running);
+			
+			Call("WinServiceWrapper.exe", "pause");
+			Call("WinServiceWrapper.exe", "continue");
+
 			Call("WinServiceWrapper.exe", "stop uninstall");
 		}
 

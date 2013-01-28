@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.ServiceProcess;
 using System.Text;
 using Topshelf;
 
@@ -27,6 +28,18 @@ namespace WinServiceWrapper
 			var pauseArgs = ConfigurationManager.AppSettings["PauseCommand"];
 			var continueArgs = ConfigurationManager.AppSettings["ContinueCommand"];
 
+			// hack around TopShelf:
+			if (string.Equals(args.FirstOrDefault(), "pause", StringComparison.InvariantCultureIgnoreCase))
+			{
+				TryPauseService(safeName);
+				return;
+			}
+			if (string.Equals(args.FirstOrDefault(), "continue", StringComparison.InvariantCultureIgnoreCase))
+			{
+				TryContinueService(safeName);
+				return;
+			}
+
 			HostFactory.Run(x =>
 			{
 				x.Service<WrapperService>(s =>
@@ -48,6 +61,24 @@ namespace WinServiceWrapper
 				x.SetServiceName(safeName);
 				x.SetDescription(description);
 			});
+		}
+
+		static void TryContinueService(string serviceName)
+		{
+			using (var service = new ServiceController(serviceName))
+			{
+				service.Continue();
+				service.WaitForStatus(ServiceControllerStatus.Running);
+			}
+		}
+
+		static void TryPauseService(string serviceName)
+		{
+			using (var service = new ServiceController(serviceName))
+			{
+				service.Pause();
+				service.WaitForStatus(ServiceControllerStatus.Paused);
+			}
 		}
 
 		static string MakeSafe(string name)

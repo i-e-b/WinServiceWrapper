@@ -23,15 +23,19 @@ namespace WinServiceWrapper
 			var safeName = MakeSafe(name);
 			var description = ConfigurationManager.AppSettings["Description"];
 			var startArgs = ConfigurationManager.AppSettings["StartCommand"];
+			var pauseArgs = ConfigurationManager.AppSettings["PauseCommand"];
+			var continueArgs = ConfigurationManager.AppSettings["ContinueCommand"];
 
 			HostFactory.Run(x =>
 			{
 				x.Service<WrapperService>(s =>
 				{
-					s.ConstructUsing(hostSettings => new WrapperService(target, startArgs));
+					s.ConstructUsing(hostSettings => new WrapperService(target, startArgs, pauseArgs, continueArgs));
 
 					s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
+					s.WhenPaused(tc => tc.Pause());
+					s.WhenContinued(tc => tc.Continue());
 				});
 				x.RunAsLocalSystem();
 
@@ -59,12 +63,16 @@ namespace WinServiceWrapper
 	{
 		readonly string _target;
 		readonly string _startArgs;
+		readonly string _pauseArgs;
 		Process _host;
+		readonly string _continueArgs;
 
-		public WrapperService(string target, string startArgs)
+		public WrapperService(string target, string startArgs, string pauseArgs, string continueArgs)
 		{
 			_target = target;
 			_startArgs = startArgs;
+			_pauseArgs = pauseArgs;
+			_continueArgs = continueArgs;
 		}
 
 		public void Start()
@@ -73,14 +81,41 @@ namespace WinServiceWrapper
 			{
 				FileName = Path.GetFullPath(_target),
 				Arguments = _startArgs,
-				CreateNoWindow = true,
-				WorkingDirectory = Directory.GetCurrentDirectory()
+				WorkingDirectory = Directory.GetCurrentDirectory(),
+				UseShellExecute = false,
+				RedirectStandardInput = true
 			});
 		}
 
 		public void Stop()
 		{
-			if (!_host.HasExited) _host.Kill();
+			_host.StandardInput.Write("\x3");
+			_host.StandardInput.Flush();
+			_host.StandardInput.Close();
+			if (!_host.WaitForExit(10000))
+			{
+				_host.Kill();
+			}
+		}
+
+		public void Pause()
+		{
+			Call(_pauseArgs);
+		}
+
+
+		void Call(string args)
+		{
+			var process = Process.Start(new ProcessStartInfo{
+				Arguments = args,
+				FileName = Path.GetFullPath(_target)
+			});
+			process.WaitForExit();
+		}
+
+		public void Continue()
+		{
+			Call(_continueArgs);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.ServiceProcess;
 using System.Threading;
 using NUnit.Framework;
 
@@ -12,40 +13,51 @@ namespace WinServiceWrapper.Integration.Tests
 		string _fileName;
 		Process _process;
 
-		[SetUp]
-		public void cleanfiles()
+		[TestFixtureSetUp]
+		public void run_service_lifetime ()
 		{
 			_fileName = "dummyout.txt";
 			if (File.Exists(_fileName)) File.Delete(_fileName);
+			Call("WinServiceWrapper.exe", "install start");
+			var service = new ServiceController("MyAppsServiceName");
+			service.WaitForStatus(ServiceControllerStatus.Running);
+			service.Pause();
+			service.WaitForStatus(ServiceControllerStatus.Paused);
+			service.Continue();
+			service.WaitForStatus(ServiceControllerStatus.Running);
+			Call("WinServiceWrapper.exe", "stop uninstall");
 		}
 
-		[TearDown]
-		public void cleanall()
+		[TestFixtureTearDown]
+		public void cleanup ()
 		{
-			Call("WinServiceWrapper.exe", "stop uninstall");
-
 			if (File.Exists(_fileName)) File.Delete(_fileName);
 		}
 
 		[Test]
 		public void startup_passes_args_to_real_process ()
 		{
-			Call("WinServiceWrapper.exe", "install start");
-
-			Assert.That(WaitFor(() => File.Exists(_fileName), TimeSpan.FromSeconds(5)), "File didn't show up");
-			Assert.That(File.ReadAllText(_fileName), Is.EqualTo("start, args"));
+			Assert.That(File.ReadAllText(_fileName), Contains.Substring("start, args"));
 		}
 
-		bool WaitFor(Func<bool> func, TimeSpan timeout)
+		[Test]
+		public void shutdown_should_try_to_soft_terminate_real_process ()
 		{
-			var start = DateTime.Now;
-			while ((DateTime.Now - start) < timeout)
-			{
-				if (func()) return true;
-				Thread.Sleep(100);
-			}
-			return false;
+			Assert.That(File.ReadAllText(_fileName), Contains.Substring("I got a Ctrl-C"));
 		}
+
+		[Test]
+		public void pause_calls_another_instance_with_arguments ()
+		{
+			Assert.That(File.ReadAllText(_fileName), Contains.Substring("pause, args"));
+		}
+
+		[Test]
+		public void continue_calls_another_instance_with_arguments ()
+		{
+			Assert.That(File.ReadAllText(_fileName), Contains.Substring("continue, args"));
+		}
+
 
 		void Call(string target, string args)
 		{

@@ -23,6 +23,7 @@ namespace WinServiceWrapper
 			var safeName = MakeSafe(name);
 			var description = ConfigurationManager.AppSettings["Description"];
 			var startArgs = ConfigurationManager.AppSettings["StartCommand"];
+			var stopArgs = ConfigurationManager.AppSettings["StopCommand"];
 			var pauseArgs = ConfigurationManager.AppSettings["PauseCommand"];
 			var continueArgs = ConfigurationManager.AppSettings["ContinueCommand"];
 
@@ -30,7 +31,7 @@ namespace WinServiceWrapper
 			{
 				x.Service<WrapperService>(s =>
 				{
-					s.ConstructUsing(hostSettings => new WrapperService(target, startArgs, pauseArgs, continueArgs));
+					s.ConstructUsing(hostSettings => new WrapperService(target, startArgs, pauseArgs, continueArgs, stopArgs));
 
 					s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
@@ -66,13 +67,15 @@ namespace WinServiceWrapper
 		readonly string _pauseArgs;
 		Process _host;
 		readonly string _continueArgs;
+		readonly string _stopArgs;
 
-		public WrapperService(string target, string startArgs, string pauseArgs, string continueArgs)
+		public WrapperService(string target, string startArgs, string pauseArgs, string continueArgs, string stopArgs)
 		{
 			_target = target;
 			_startArgs = startArgs;
 			_pauseArgs = pauseArgs;
 			_continueArgs = continueArgs;
+			_stopArgs = stopArgs;
 		}
 
 		public void Start()
@@ -89,13 +92,23 @@ namespace WinServiceWrapper
 
 		public void Stop()
 		{
+			if (string.IsNullOrWhiteSpace(_stopArgs))
+			{
+				DirectStop();
+			}
+			else
+			{
+				Call(_stopArgs);
+				WaitForExit_ForceKillAfterTenSeconds();
+			}
+		}
+
+		void DirectStop()
+		{
 			_host.StandardInput.Write("\x3");
 			_host.StandardInput.Flush();
 			_host.StandardInput.Close();
-			if (!_host.WaitForExit(10000))
-			{
-				_host.Kill();
-			}
+			WaitForExit_ForceKillAfterTenSeconds();
 		}
 
 		public void Pause()
@@ -103,6 +116,18 @@ namespace WinServiceWrapper
 			Call(_pauseArgs);
 		}
 
+		public void Continue()
+		{
+			Call(_continueArgs);
+		}
+
+		void WaitForExit_ForceKillAfterTenSeconds()
+		{
+			if (!_host.WaitForExit(10000))
+			{
+				_host.Kill();
+			}
+		}
 
 		void Call(string args)
 		{
@@ -111,11 +136,6 @@ namespace WinServiceWrapper
 				FileName = Path.GetFullPath(_target)
 			});
 			process.WaitForExit();
-		}
-
-		public void Continue()
-		{
-			Call(_continueArgs);
 		}
 	}
 }

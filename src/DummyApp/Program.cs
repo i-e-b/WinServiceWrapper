@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace DummyApp
 {
@@ -11,6 +13,8 @@ namespace DummyApp
 		{
 			_fileName = "dummyout.txt";
 			File.AppendAllText(_fileName, "\r\n"+string.Join(", ", args));
+
+			if (args.Length > 0 && args[0] == "stop") KillAllInstances();
 
 			if (args.Length < 1 || args[0] != "start") return;
 
@@ -27,6 +31,17 @@ namespace DummyApp
 					}
 				}
 			}
+		}
+
+		static void KillAllInstances()
+		{
+			var me = Process.GetCurrentProcess().Id;
+			var all = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
+			foreach (var process in all.Where(process => process.Id != me))
+			{
+				process.Kill();
+			}
+			Environment.Exit(0);
 		}
 
 		static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)

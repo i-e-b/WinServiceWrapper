@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinServiceWrapper.Integrati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinServiceWrapper.Integration_RestartIfFailed.Tests", "src\WinServiceWrapper.Integration_RestartIfFailed.Tests\WinServiceWrapper.Integration_RestartIfFailed.Tests.csproj", "{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTest", "src\QuickTest\QuickTest.csproj", "{5CF2A3FE-6B04-4F05-8E90-2D3D79CF79EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinServiceWrapper.Integration_Exception.Tests", "src\WinServiceWrapper.Integration_Exception.Tests\WinServiceWrapper.Integration_Exception.Tests.csproj", "{870018DD-C358-40D8-B520-94E04D6B0AA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CF2A3FE-6B04-4F05-8E90-2D3D79CF79EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CF2A3FE-6B04-4F05-8E90-2D3D79CF79EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CF2A3FE-6B04-4F05-8E90-2D3D79CF79EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CF2A3FE-6B04-4F05-8E90-2D3D79CF79EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{870018DD-C358-40D8-B520-94E04D6B0AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{870018DD-C358-40D8-B520-94E04D6B0AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{870018DD-C358-40D8-B520-94E04D6B0AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{870018DD-C358-40D8-B520-94E04D6B0AA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,5 +60,7 @@ Global
 		{05DF30A8-3D39-4F77-B2CA-6BA4D95F13AA} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
 		{D24971C3-FEE9-4C66-856F-02D60762A98A} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
 		{5C5E29F0-3BFD-4F5B-A0FC-BB6C126D334F} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
+		{5CF2A3FE-6B04-4F05-8E90-2D3D79CF79EC} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
+		{870018DD-C358-40D8-B520-94E04D6B0AA7} = {04AF7A42-FDB3-4E90-95ED-9171FE7F4023}
 	EndGlobalSection
 EndGlobal

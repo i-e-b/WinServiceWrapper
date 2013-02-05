@@ -30,15 +30,7 @@ namespace WinServiceWrapper
 			_stopping = false;
 			try
 			{
-				_childProcess = Process.Start(new ProcessStartInfo
-				{
-					FileName = Path.GetFullPath(_target),
-					Arguments = _startArgs,
-					WorkingDirectory = Path.GetDirectoryName(_target) ?? Directory.GetCurrentDirectory(),
-					CreateNoWindow = true,
-					UseShellExecute = false,
-					RedirectStandardInput = true
-				});
+				_childProcess = Call(_startArgs);
 				_childProcess.EnableRaisingEvents = true;
 				_childProcess.Exited += ChildProcessDied;
 			}
@@ -59,7 +51,7 @@ namespace WinServiceWrapper
 				}
 				else
 				{
-					Call(_stopArgs);
+					Call(_stopArgs).WaitForExit();
 					WaitForExit_ForceKillAfterTenSeconds();
 				}
 			}
@@ -74,7 +66,7 @@ namespace WinServiceWrapper
 			_stopping = false;
 			try
 			{
-				Call(_pauseArgs);
+				Call(_pauseArgs).WaitForExit();
 			}
 			catch (Exception ex)
 			{
@@ -87,7 +79,7 @@ namespace WinServiceWrapper
 			_stopping = false;
 			try
 			{
-				Call(_continueArgs);
+				Call(_continueArgs).WaitForExit();
 			}
 			catch (Exception ex)
 			{
@@ -97,11 +89,11 @@ namespace WinServiceWrapper
 
 		void WriteWrapperFailure(Exception exception)
 		{
-			var log = CheckSource("Windows Service Wrapper: "+_displayName);
+			var log = CheckSource("Windows Service Wrapper: " + _displayName);
 
-			EventLog.WriteEntry(log, 
+			EventLog.WriteEntry(log,
 				"Wrapper failure: "
-				+ exception.GetType().Name + ": " + exception.Message +"\r\n"
+				+ exception.GetType().Name + ": " + exception.Message + "\r\n"
 				+ exception.StackTrace,
 				EventLogEntryType.Error);
 		}
@@ -148,13 +140,23 @@ namespace WinServiceWrapper
 			}
 		}
 
-		void Call(string args)
+		Process Call(string args)
 		{
-			var process = Process.Start(new ProcessStartInfo{
-				Arguments = args,
-				FileName = Path.GetFullPath(_target)
-			});
-			process.WaitForExit();
+			return Process.Start(new ProcessStartInfo
+				{
+					FileName = Path.GetFullPath(_target),
+					Arguments = args,
+					RedirectStandardInput = true,
+
+					WorkingDirectory = Path.GetDirectoryName(_target) ?? "C:\\",
+
+					ErrorDialog = false,
+					CreateNoWindow = true,
+					WindowStyle = ProcessWindowStyle.Hidden,
+
+					UseShellExecute = false,
+					LoadUserProfile = false
+				});
 		}
 	}
 }

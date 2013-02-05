@@ -34,7 +34,7 @@ namespace WinServiceWrapper
 				{
 					FileName = Path.GetFullPath(_target),
 					Arguments = _startArgs,
-					WorkingDirectory = Directory.GetCurrentDirectory(),
+					WorkingDirectory = Path.GetDirectoryName(_target) ?? Directory.GetCurrentDirectory(),
 					CreateNoWindow = true,
 					UseShellExecute = false,
 					RedirectStandardInput = true
@@ -142,7 +142,7 @@ namespace WinServiceWrapper
 
 		void WaitForExit_ForceKillAfterTenSeconds()
 		{
-			if (!_childProcess.WaitForExit(10000))
+			if (!_childProcess.WaitForExit(30000))
 			{
 				_childProcess.Kill();
 			}

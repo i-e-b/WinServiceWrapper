@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace DummyApp
 {
@@ -20,20 +22,18 @@ namespace DummyApp
 
 			if (args.Length < 1 || args[0] != "start") return;
 			
-			if (args.Length > 1 && args[1] == "withException")
+			if (args.Contains("withException"))
 				throw new Exception("Example exception");
 
-			Console.CancelKeyPress += Console_CancelKeyPress;
-			using (var inp = Console.OpenStandardInput())
+			if (args.Contains("-p"))
 			{
-				while (true)
-				{
-					var x = inp.ReadByte();
-					if (x != 3 && x != -1) continue;
-					File.AppendAllText(_fileName, "\r\nI got a Ctrl-C");
-					Environment.Exit(0);
-				}
+				var L = args.IndexOf("-p");
+				var ppid = int.Parse(args[L + 1]);
+				Process.GetProcessById(ppid).WaitForExit(10000);
+				File.AppendAllText(_fileName, "\r\nParent died, so must I! Alas!");
 			}
+
+			while (true){Thread.Sleep(1000);}
 		}
 
 		static void KillAllInstances()
@@ -47,12 +47,19 @@ namespace DummyApp
 			}
 			Environment.Exit(0);
 		}
+	}
 
-		static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+	public static class Ext
+	{
+		public static int IndexOf<T>(this IEnumerable<T> src, T target)
 		{
-			e.Cancel = true;
-			File.AppendAllText(_fileName, "\r\nI got a Ctrl-C");
-			Environment.Exit(0);
+			int i = 0;
+			foreach (var x in src)
+			{
+				if (Equals(target, x)) return i;
+				i++;
+			}
+			return -1;
 		}
 	}
 }

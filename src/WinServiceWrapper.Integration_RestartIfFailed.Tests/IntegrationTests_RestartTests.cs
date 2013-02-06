@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace WinServiceWrapper.Integration.Tests
 {
 	[TestFixture]
-    public class IntegrationTests_ExternalStop
+    public class IntegrationTests_RestartTests
     {
 		string _fileName;
 		Process _process;

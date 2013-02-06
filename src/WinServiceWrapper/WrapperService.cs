@@ -30,7 +30,8 @@ namespace WinServiceWrapper
 			_stopping = false;
 			try
 			{
-				_childProcess = Call(_startArgs);
+				var complexArgs = string.Format(_startArgs, Process.GetCurrentProcess().Id);
+				_childProcess = Call(complexArgs);
 				_childProcess.EnableRaisingEvents = true;
 				_childProcess.Exited += ChildProcessDied;
 			}
@@ -43,17 +44,12 @@ namespace WinServiceWrapper
 		public void Stop()
 		{
 			_stopping = true;
+			if (string.IsNullOrWhiteSpace(_stopArgs)) return;
+			
 			try
 			{
-				if (string.IsNullOrWhiteSpace(_stopArgs))
-				{
-					DirectStop();
-				}
-				else
-				{
-					Call(_stopArgs).WaitForExit();
-					WaitForExit_ForceKillAfterTenSeconds();
-				}
+				Call(_stopArgs).WaitForExit();
+				WaitForExit_ForceKillAfterTenSeconds();
 			}
 			catch (Exception ex)
 			{
@@ -124,14 +120,6 @@ namespace WinServiceWrapper
 			Environment.Exit(_childProcess.ExitCode);
 		}
 
-		void DirectStop()
-		{
-			_childProcess.StandardInput.Write("\x3");
-			_childProcess.StandardInput.Flush();
-			_childProcess.StandardInput.Close();
-			WaitForExit_ForceKillAfterTenSeconds();
-		}
-
 		void WaitForExit_ForceKillAfterTenSeconds()
 		{
 			if (!_childProcess.WaitForExit(30000))
@@ -146,7 +134,6 @@ namespace WinServiceWrapper
 				{
 					FileName = Path.GetFullPath(_target),
 					Arguments = args,
-					RedirectStandardInput = true,
 
 					WorkingDirectory = Path.GetDirectoryName(_target) ?? "C:\\",
 
@@ -154,8 +141,7 @@ namespace WinServiceWrapper
 					CreateNoWindow = true,
 					WindowStyle = ProcessWindowStyle.Hidden,
 
-					UseShellExecute = false,
-					LoadUserProfile = false
+					UseShellExecute = true
 				});
 		}
 	}

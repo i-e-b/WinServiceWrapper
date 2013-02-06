@@ -38,7 +38,7 @@ namespace WinServiceWrapper.Integration.Tests
 		[Test]
 		public void shutdown_should_try_to_soft_terminate_real_process ()
 		{
-			Assert.That(File.ReadAllText(_fileName), Contains.Substring("I got a Ctrl-C"));
+			Assert.That(File.ReadAllText(_fileName), Contains.Substring("Parent died, so must I! Alas!"));
 		}
 
 		[Test]

@@ -30,7 +30,10 @@ namespace WinServiceWrapper.Integration.Tests
 		[TestFixtureTearDown]
 		public void cleanup ()
 		{
-			Call("WinServiceWrapper.exe", "stop uninstall");
+			Call("WinServiceWrapper.exe", "stop");
+			var service = new ServiceController("MyAppsServiceName");
+			service.WaitForStatus(ServiceControllerStatus.Stopped);
+			Call("WinServiceWrapper.exe", "uninstall");
 			if (File.Exists(_fileName)) File.Delete(_fileName);
 		}
 

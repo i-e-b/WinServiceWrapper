@@ -16,9 +16,6 @@ namespace WinServiceWrapper.Integration_Exception.Tests
 			_fileName = "dummyout.txt";
 			if (File.Exists(_fileName)) File.Delete(_fileName);
 			Call("WinServiceWrapper.exe", "install start");
-			
-			Call("WinServiceWrapper.exe", "pause");
-			Call("WinServiceWrapper.exe", "continue");
 
 			Call("WinServiceWrapper.exe", "stop uninstall");
 		}
@@ -33,18 +30,6 @@ namespace WinServiceWrapper.Integration_Exception.Tests
 		public void startup_passes_args_to_real_process ()
 		{
 			Assert.That(File.ReadAllText(_fileName), Contains.Substring("start, withException"));
-		}
-
-		[Test]
-		public void pause_calls_another_instance_with_arguments ()
-		{
-			Assert.That(File.ReadAllText(_fileName), Contains.Substring("pause, args"));
-		}
-
-		[Test]
-		public void continue_calls_another_instance_with_arguments ()
-		{
-			Assert.That(File.ReadAllText(_fileName), Contains.Substring("continue, args"));
 		}
 
 		[Test]

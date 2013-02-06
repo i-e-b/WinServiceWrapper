@@ -31,6 +31,7 @@ namespace DummyApp
 				var ppid = int.Parse(args[L + 1]);
 				Process.GetProcessById(ppid).WaitForExit(10000);
 				File.AppendAllText(_fileName, "\r\nParent died, so must I! Alas!");
+                return;
 			}
 
 			while (true){Thread.Sleep(1000);}

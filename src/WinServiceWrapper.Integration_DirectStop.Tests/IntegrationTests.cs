@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.ServiceProcess;
 using NUnit.Framework;
 
 namespace WinServiceWrapper.Integration.Tests
@@ -20,7 +21,10 @@ namespace WinServiceWrapper.Integration.Tests
 			Call("WinServiceWrapper.exe", "pause");
 			Call("WinServiceWrapper.exe", "continue");
 
-			Call("WinServiceWrapper.exe", "stop uninstall");
+			Call("WinServiceWrapper.exe", "stop");
+			var service = new ServiceController("MyAppsServiceName");
+			service.WaitForStatus(ServiceControllerStatus.Stopped);
+			Call("WinServiceWrapper.exe", "uninstall");
 		}
 
 		[TestFixtureTearDown]

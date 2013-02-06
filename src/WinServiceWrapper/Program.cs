@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
@@ -26,13 +27,21 @@ namespace WinServiceWrapper
 			var pauseArgs = ConfigurationManager.AppSettings["PauseCommand"];
 			var continueArgs = ConfigurationManager.AppSettings["ContinueCommand"];
 
+            // Dummy version of ourself -- just sit and wait
+            if (args.FirstIs("waitForPid"))
+			{
+                var ppid = int.Parse(args[1]);
+                Process.GetProcessById(ppid).WaitForExit();
+                return;
+			}
+
 			// hack around TopShelf:
-			if (string.Equals(args.FirstOrDefault(), "pause", StringComparison.InvariantCultureIgnoreCase))
+			if (args.FirstIs("pause"))
 			{
 				TryPauseService(safeName);
 				return;
 			}
-			if (string.Equals(args.FirstOrDefault(), "continue", StringComparison.InvariantCultureIgnoreCase))
+			if (args.FirstIs("continue"))
 			{
 				TryContinueService(safeName);
 				return;
@@ -88,5 +97,13 @@ namespace WinServiceWrapper
 			}
 			return sb.ToString();
 		}
+	}
+
+	public static class Ext
+	{
+        public static bool FirstIs(this string[] args, string target)
+        {
+            return string.Equals(args.FirstOrDefault(), target, StringComparison.InvariantCultureIgnoreCase);
+        }
 	}
 }

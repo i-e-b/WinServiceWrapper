@@ -15,7 +15,7 @@ namespace WinServiceWrapper
 		volatile bool _stopping;
 
 		Process _childProcess;
-        Process _dummyProcess;
+		Process _dummyProcess;
 
 		public WrapperService(string displayName, string target, string startArgs, string pauseArgs, string continueArgs, string stopArgs)
 		{
@@ -34,7 +34,7 @@ namespace WinServiceWrapper
 			{
 				if (_startArgs.Contains("{0}"))
 				{
-					_dummyProcess = Call(Process.GetCurrentProcess().MainModule.FileName, "waitForPid "+Process.GetCurrentProcess().Id);
+					_dummyProcess = Call(Process.GetCurrentProcess().MainModule.FileName, "waitForPid " + Process.GetCurrentProcess().Id);
 					_childProcess = Call(_target, string.Format(_startArgs, _dummyProcess.Id));
 				}
 				else
@@ -54,7 +54,7 @@ namespace WinServiceWrapper
 
 		public void Stop()
 		{
-            if (_stopping) return;
+			if (_stopping) return;
 			_stopping = true;
 			if (string.IsNullOrWhiteSpace(_stopArgs)) StopWithCircularMonitoring();
 			else StopWithArguments();
@@ -77,10 +77,11 @@ namespace WinServiceWrapper
 			{
 				WriteWrapperFailure(ex);
 			}
-        }
+		}
 
 		public void Pause()
 		{
+			if (string.IsNullOrEmpty(_pauseArgs)) return;
 			_stopping = false;
 			try
 			{
@@ -94,6 +95,7 @@ namespace WinServiceWrapper
 
 		public void Continue()
 		{
+			if (string.IsNullOrEmpty(_continueArgs)) return;
 			_stopping = false;
 			try
 			{
@@ -139,7 +141,7 @@ namespace WinServiceWrapper
 		{
 			if (_stopping) return;
 			WriteChildFailure("error code: " + _childProcess.ExitCode);
-            KillDummy();
+			KillDummy();
 			Environment.Exit(_childProcess.ExitCode);
 		}
 
@@ -153,10 +155,10 @@ namespace WinServiceWrapper
 
 		void WaitForExit_ForceKillAfter90Seconds()
 		{
-            if (!IsOk(_childProcess)) return;
+			if (!IsOk(_childProcess)) return;
 			if (!_childProcess.WaitForExit((int)TimeSpan.FromSeconds(90).TotalMilliseconds))
 			{
-                WriteChildFailure("Process did not close gracefully, will be killed");
+				WriteChildFailure("Process did not close gracefully, will be killed");
 				_childProcess.Kill();
 			}
 		}
@@ -180,8 +182,8 @@ namespace WinServiceWrapper
 
 		static bool IsOk(Process dummyProcess)
 		{
-            if (dummyProcess == null) return false;
-            dummyProcess.Refresh();
+			if (dummyProcess == null) return false;
+			dummyProcess.Refresh();
 			return !dummyProcess.HasExited;
 		}
 	}

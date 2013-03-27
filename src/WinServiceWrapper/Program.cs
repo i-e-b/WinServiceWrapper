@@ -27,12 +27,12 @@ namespace WinServiceWrapper
 			var pauseArgs = ConfigurationManager.AppSettings["PauseCommand"];
 			var continueArgs = ConfigurationManager.AppSettings["ContinueCommand"];
 
-            // Dummy version of ourself -- just sit and wait
-            if (args.FirstIs("waitForPid"))
+			// Dummy version of ourself -- just sit and wait
+			if (args.FirstIs("waitForPid"))
 			{
-                var ppid = int.Parse(args[1]);
-                Process.GetProcessById(ppid).WaitForExit();
-                return;
+				var ppid = int.Parse(args[1]);
+				Process.GetProcessById(ppid).WaitForExit();
+				return;
 			}
 
 			// hack around TopShelf:
@@ -101,9 +101,9 @@ namespace WinServiceWrapper
 
 	public static class Ext
 	{
-        public static bool FirstIs(this string[] args, string target)
-        {
-            return string.Equals(args.FirstOrDefault(), target, StringComparison.InvariantCultureIgnoreCase);
-        }
+		public static bool FirstIs(this string[] args, string target)
+		{
+			return string.Equals(args.FirstOrDefault(), target, StringComparison.InvariantCultureIgnoreCase);
+		}
 	}
 }

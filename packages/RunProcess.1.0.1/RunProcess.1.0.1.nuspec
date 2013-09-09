@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>RunProcess</id>
+    <version>1.0.1</version>
+    <title>RunProcess</title>
+    <authors>iainb</authors>
+    <owners>iainb</owners>
+    <licenseUrl>http://creativecommons.org/licenses/by-sa/3.0/</licenseUrl>
+    <projectUrl>https://github.com/i-e-b/RunProcess</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A process host for Windows (Vista and later) that is more reliable and flexible than System.Diagnostics.Process</description>
+    <summary>Run Windows processes, a replacement for System.Diagnostics.Process</summary>
+    <releaseNotes>More reliable WaitForExit</releaseNotes>
+    <copyright />
+    <language>en-GB</language>
+  </metadata>
+</package>

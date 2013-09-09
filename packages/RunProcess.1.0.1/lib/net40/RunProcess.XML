@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RunProcess</name>
+    </assembly>
+    <members>
+        <member name="T:RunProcess.InteractiveShell">
+            <summary>
+            Special handler for interactive shell child processes.
+            (e.g. FTP, telnet)
+            </summary>
+        </member>
+        <member name="M:RunProcess.InteractiveShell.#ctor(System.String,System.String)">
+            <summary>
+            Create a new wrapper for interactive shells.
+            </summary>
+            <param name="processPrompt">Prompt displayed by shell</param>
+            <param name="exitCommand">command to send for exit</param>
+        </member>
+        <member name="M:RunProcess.InteractiveShell.ReadToPrompt">
+            <summary>
+            Read stdout and stderr until prompt is printed.
+            </summary>
+            <returns>A 2-string Tuple; the first item is stdout, the second stderr.</returns>
+            <remarks>This method may never return as it doesn't have a time-out.</remarks>
+        </member>
+        <member name="M:RunProcess.InteractiveShell.SendAndReceive(System.String)">
+            <summary>
+            Read stdout and stderr until prompt is printed.
+            </summary>
+            <param name="toSend">What to send without the line-feed and carriage return.</param>
+            <returns>A 2-string Tuple; the first item is stdout, the second stderr.</returns>
+            <remarks>This method may never return as it doesn't have a time-out.</remarks>
+        </member>
+        <member name="M:RunProcess.InteractiveShell.Start(System.String,System.String)">
+            <summary>
+            Start shell.
+            </summary>
+        </member>
+        <member name="M:RunProcess.InteractiveShell.Terminate">
+            <summary>
+            Tell shell to exit and free resources.
+            </summary>
+        </member>
+        <member name="M:RunProcess.InteractiveShell.Dispose">
+            <summary>
+            Kill and dispose of child process
+            </summary>
+        </member>
+        <member name="M:RunProcess.InteractiveShell.IsAlive">
+            <summary>
+            True is child process is still running. False if child has exited
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:RunProcess.InteractiveShell.ApplicationName">
+            <summary>
+            Name of application, as passed to Start()
+            </summary>
+        </member>
+        <member name="P:RunProcess.InteractiveShell.Prompt">
+            <summary>
+            Prompt as supplied by shell.
+            Used for ReadToPrompt()
+            </summary>
+        </member>
+        <member name="P:RunProcess.InteractiveShell.ExitCommand">
+            <summary>
+            Command to exit shell
+            Used by Terminate()
+            </summary>
+        </member>
+        <member name="P:RunProcess.InteractiveShell.Encoding">
+            <summary>
+            Text encoding of shell
+            </summary>
+        </member>
+        <member name="T:RunProcess.Internal.Pipe">
+            <summary>
+            Wrapper around Windows API pipes
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.#ctor(RunProcess.Internal.Pipe.Direction)">
+            <summary>
+            Create a new Windows Kernel pipe
+            </summary>
+            <param name="dir">Direction of pipe (read or write settings)</param>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Write a byte buffer to the pipe
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.Peek">
+            <summary>
+            Return the number of bytes available on the pipe
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.PeekRead(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Read from the pipe into a byte buffer without removing from the pipe,
+            blocking until buffer has at least some data.
+            Use Peek() to determine if a read would be blocking.
+            Returns number of bytes read
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Read from the pipe into a byte buffer, blocking until buffer has at least some data.
+            Use Peek() to determine if a read would be blocking.
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.Dispose">
+            <summary>
+            Close pipe and dispose of resources.
+            </summary>
+            <exception cref="T:System.ComponentModel.Win32Exception">System.ComponentModel.Win32Exception</exception>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.Finalize">
+            <summary>
+            Close pipe and dispose of resources.
+            </summary>
+            <exception cref="T:System.ComponentModel.Win32Exception">System.ComponentModel.Win32Exception</exception>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.ReadAllText(System.Text.Encoding)">
+            <summary>
+            Read all available data on the pipe as text
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.WriteAllText(System.Text.Encoding,System.String)">
+            <summary>
+            Write a text string to the pipe.
+            No line endings are added.
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.WriteLine(System.Text.Encoding,System.String)">
+            <summary>
+            Write a text string to the pipe, adding a line terminator.
+            </summary>
+        </member>
+        <member name="M:RunProcess.Internal.Pipe.ReadLine(System.Text.Encoding,System.TimeSpan)">
+            <summary>
+            Read text from a pipe, up until the next line ending.
+            The line ending will be consumed. Will wait up to timeout
+            for a line ending while no data is being read.
+            </summary>
+            <remarks>This reads one byte at a time, and is therefore quite slow!</remarks>
+        </member>
+        <member name="P:RunProcess.Internal.Pipe.ReadHandle">
+            <summary>
+            Internal Read handle. Use with extreme caution
+            </summary>
+        </member>
+        <member name="P:RunProcess.Internal.Pipe.WriteHandle">
+            <summary>
+            Internal Write handle. Use with extreme caution
+            </summary>
+        </member>
+        <member name="T:RunProcess.Internal.Pipe.Direction">
+            <summary>
+            Direction of pipe (write or read)
+            </summary>
+        </member>
+        <member name="F:RunProcess.Internal.Pipe.Direction.In">
+            <summary>
+            Pipe is a writeable pipe
+            </summary>
+        </member>
+        <member name="F:RunProcess.Internal.Pipe.Direction.Out">
+            <summary>
+            Pipe is a readable pipe
+            </summary>
+        </member>
+        <member name="T:RunProcess.Internal.WindowsErrors">
+            <summary>
+            Windows API error codes.
+            Descriptions are generally unhelpful, if you get one of these, dig through MSDN.
+            </summary>
+        </member>
+        <member name="F:RunProcess.Internal.WindowsErrors.InvalidArgument">
+            <summary>
+            The parameter is incorrect.
+            </summary>
+        </member>
+        <member name="F:RunProcess.Internal.WindowsErrors.BadEnvironmentOption">
+            <summary>
+            The system could not find the environment option that was entered.
+            </summary>
+        </member>
+        <member name="F:RunProcess.Internal.WindowsErrors.NoMoreFiles">
+            <summary>
+            There are no more files.
+            </summary>
+        </member>
+        <member name="F:RunProcess.Internal.WindowsErrors.HandleIsInvalid">
+            <summary>
+            The handle is invalid (usually referring to a closed resource)
+            </summary>
+        </member>
+        <member name="T:RunProcess.ProcessHost">
+            <summary>
+            Windows specific process host,
+            more reliable than System.Diagnostics.Process
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.HostIsCompatible">
+            <summary>
+            Returns true if the host operating system can run
+            ProcessHost. If false, trying to create a new ProcessHost
+            will result in an exception
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.#ctor(System.String,System.String)">
+            <summary>
+            Create a new process wrapper with an executable path and wroking directory.
+            </summary>
+            <param name="executablePath">Path to executable</param>
+            <param name="workingDirectory">Starting directory for executable. May be left empty to inherit from parent</param>
+        </member>
+        <member name="M:RunProcess.ProcessHost.Start">
+            <summary>
+            Start the child process with no arguments
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.Start(System.String)">
+            <summary>
+            Start the process with an argument string
+            Arguments will be split and passed to the child by Windows APIs
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.IsAlive">
+            <summary>
+            True if child process is still running. False if the child has exited.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:RunProcess.ProcessHost.WaitForExit(System.TimeSpan)">
+            <summary>
+            Waits a given time for the process to exit.
+            Returns true if exited within timeout, false if still running after timeout.
+            Will return true if the process is unstarted or already exited.
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.WaitForExit(System.TimeSpan,System.Int32@)">
+            <summary>
+            Waits a given time for the process to exit.
+            Returns true if exited within timeout, false if still running after timeout.
+            Will return true if the process is unstarted or already exited.
+            Gives process exit code, or 0 if timed out.
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.Kill">
+            <summary>
+            Immediately terminate a process.
+            This will not allow the child to clean up and should be used as a last resort.
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.ExitCode">
+            <summary>
+            Get exit code from process. Throws if not exited.
+            Use WaitForExit if you want to wait for a return code
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.ProcessId">
+            <summary>
+            Return hosted process id
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.Finalize">
+            <summary>
+            Dispose on destruction
+            </summary>
+        </member>
+        <member name="M:RunProcess.ProcessHost.Dispose">
+            <summary>
+            Release all process-related resources.
+            The child process will be killed if still running
+            </summary>
+        </member>
+        <member name="P:RunProcess.ProcessHost.StdIn">
+            <summary>
+            Writable standard input pipe
+            </summary>
+        </member>
+        <member name="P:RunProcess.ProcessHost.StdErr">
+            <summary>
+            Readable standard 'error' pipe.
+            Note that most processes use this for human-readable output, not only for errors
+            </summary>
+        </member>
+        <member name="P:RunProcess.ProcessHost.StdOut">
+            <summary>
+            Readable standard output pipe.
+            This is usually used for machine-readable output
+            </summary>
+        </member>
+    </members>
+</doc>

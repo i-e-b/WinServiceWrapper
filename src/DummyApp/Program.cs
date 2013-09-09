@@ -14,14 +14,14 @@ namespace DummyApp
 		static void Main(string[] args)
 		{
 			_fileName = "dummyout.txt";
-			File.AppendAllText(_fileName, "\r\n"+string.Join(", ", args));
+			File.AppendAllText(_fileName, "\r\n" + string.Join(", ", args));
 
 			Console.WriteLine("Dummy app has started");
 
 			if (args.Length > 0 && args[0] == "stop") KillAllInstances();
 
 			if (args.Length < 1 || args[0] != "start") return;
-			
+
 			if (args.Contains("withException"))
 				throw new Exception("Example exception");
 
@@ -31,10 +31,10 @@ namespace DummyApp
 				var ppid = int.Parse(args[L + 1]);
 				Process.GetProcessById(ppid).WaitForExit(10000);
 				File.AppendAllText(_fileName, "\r\nParent died, so must I! Alas!");
-                return;
+				return;
 			}
 
-			while (true){Thread.Sleep(1000);}
+			while (true) { Thread.Sleep(1000); }
 		}
 
 		static void KillAllInstances()

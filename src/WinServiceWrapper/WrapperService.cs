@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using RunProcess;
 
 namespace WinServiceWrapper
 {
@@ -14,8 +16,8 @@ namespace WinServiceWrapper
 		readonly string _stopArgs;
 		volatile bool _stopping;
 
-		Process _childProcess;
-		Process _dummyProcess;
+		ProcessHost _childProcess;
+		ProcessHost _dummyProcess;
 
 		public WrapperService(string displayName, string target, string startArgs, string pauseArgs, string continueArgs, string stopArgs)
 		{
@@ -35,16 +37,15 @@ namespace WinServiceWrapper
 				if (_startArgs.Contains("{0}"))
 				{
 					_dummyProcess = Call(Process.GetCurrentProcess().MainModule.FileName, "waitForPid " + Process.GetCurrentProcess().Id);
-					_childProcess = Call(_target, string.Format(_startArgs, _dummyProcess.Id));
+					_childProcess = Call(_target, string.Format(_startArgs, _dummyProcess.ProcessId()));
 				}
 				else
 				{
 					_childProcess = Call(_target, _startArgs);
 				}
 
-
-				_childProcess.EnableRaisingEvents = true;
-				_childProcess.Exited += ChildProcessDied;
+				var t = new Thread(() => MonitorChild(_childProcess));
+				t.Start();
 			}
 			catch (Exception ex)
 			{
@@ -70,7 +71,8 @@ namespace WinServiceWrapper
 		{
 			try
 			{
-				Call(_target, _stopArgs).WaitForExit();
+				using (var proc = Call(_target, _stopArgs))
+					proc.WaitForExit(TimeSpan.FromMinutes(5));
 				WaitForExit_ForceKillAfter90Seconds();
 			}
 			catch (Exception ex)
@@ -85,7 +87,8 @@ namespace WinServiceWrapper
 			_stopping = false;
 			try
 			{
-				Call(_target, _pauseArgs).WaitForExit();
+				using (var proc = Call(_target, _pauseArgs))
+					proc.WaitForExit(TimeSpan.FromMinutes(5));
 			}
 			catch (Exception ex)
 			{
@@ -99,7 +102,8 @@ namespace WinServiceWrapper
 			_stopping = false;
 			try
 			{
-				Call(_target, _continueArgs).WaitForExit();
+				using (var proc = Call(_target, _continueArgs))
+					proc.WaitForExit(TimeSpan.FromMinutes(5));
 			}
 			catch (Exception ex)
 			{
@@ -137,54 +141,49 @@ namespace WinServiceWrapper
 			}
 		}
 
-		void ChildProcessDied(object sender, EventArgs e)
+		void MonitorChild(ProcessHost child)
 		{
+			while (!_stopping && child.IsAlive())
+			{
+				Thread.Sleep(250);
+			}
 			if (_stopping) return;
-			WriteChildFailure("error code: " + _childProcess.ExitCode);
+
+			WriteChildFailure("error code: " + _childProcess.ExitCode());
 			KillDummy();
-			Environment.Exit(_childProcess.ExitCode);
+			Environment.Exit(_childProcess.ExitCode());
 		}
 
 		void KillDummy()
 		{
-			if (IsOk(_dummyProcess))
-			{
-				_dummyProcess.Kill();
-			}
+			if (!IsOk(_dummyProcess)) return;
+			_dummyProcess.Kill();
+			_dummyProcess.Dispose();
+			_dummyProcess = null;
 		}
 
 		void WaitForExit_ForceKillAfter90Seconds()
 		{
 			if (!IsOk(_childProcess)) return;
-			if (!_childProcess.WaitForExit((int)TimeSpan.FromSeconds(90).TotalMilliseconds))
+			if (!_childProcess.WaitForExit(TimeSpan.FromSeconds(90)))
 			{
 				WriteChildFailure("Process did not close gracefully, will be killed");
 				_childProcess.Kill();
 			}
+			_childProcess.Dispose();
+			_childProcess = null;
 		}
 
-		static Process Call(string exePath, string args)
+		static ProcessHost Call(string exePath, string args)
 		{
-			return Process.Start(new ProcessStartInfo
-				{
-					FileName = Path.GetFullPath(exePath),
-					Arguments = args,
-
-					WorkingDirectory = Path.GetDirectoryName(exePath) ?? "C:\\",
-
-					ErrorDialog = false,
-					CreateNoWindow = true,
-					WindowStyle = ProcessWindowStyle.Hidden,
-
-					UseShellExecute = true
-				});
+			var proc = new ProcessHost(exePath, Path.GetDirectoryName(exePath) ?? "C:\\");
+			proc.Start(args);
+			return proc;
 		}
 
-		static bool IsOk(Process dummyProcess)
+		static bool IsOk(ProcessHost dummyProcess)
 		{
-			if (dummyProcess == null) return false;
-			dummyProcess.Refresh();
-			return !dummyProcess.HasExited;
+			return dummyProcess != null && dummyProcess.IsAlive();
 		}
 	}
 }

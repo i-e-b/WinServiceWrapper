@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using RunProcess;
 
@@ -14,12 +15,17 @@ namespace WinServiceWrapper
 		readonly string _pauseArgs;
 		readonly string _continueArgs;
 		readonly string _stopArgs;
+		readonly string _stdOutLog;
+		readonly string _stdErrLog;
+		readonly bool _shouldLogOut;
+		readonly bool _shouldLogErr;
 		volatile bool _stopping;
 
 		ProcessHost _childProcess;
 		ProcessHost _dummyProcess;
 
-		public WrapperService(string displayName, string target, string startArgs, string pauseArgs, string continueArgs, string stopArgs)
+		public WrapperService(string displayName, string target, string startArgs, string pauseArgs,
+			string continueArgs, string stopArgs, string stdOutLog, string stdErrLog)
 		{
 			_displayName = displayName;
 			_target = target;
@@ -27,6 +33,11 @@ namespace WinServiceWrapper
 			_pauseArgs = pauseArgs;
 			_continueArgs = continueArgs;
 			_stopArgs = stopArgs;
+			_stdOutLog = stdOutLog;
+			_stdErrLog = stdErrLog;
+
+			_shouldLogOut = !string.IsNullOrWhiteSpace(_stdOutLog);
+			_shouldLogErr = !string.IsNullOrWhiteSpace(_stdErrLog);
 		}
 
 		public void Start()
@@ -46,10 +57,34 @@ namespace WinServiceWrapper
 
 				var t = new Thread(() => MonitorChild(_childProcess));
 				t.Start();
+
+				if (_shouldLogOut || _shouldLogErr)
+				{
+					var tlogs = new Thread(() => WriteLogs(_target, _childProcess)) {IsBackground = true};
+					tlogs.Start();
+				}
 			}
 			catch (Exception ex)
 			{
 				WriteWrapperFailure(ex);
+			}
+		}
+
+		void WriteLogs(string process, ProcessHost childProcess)
+		{
+			while (!_stopping && childProcess.IsAlive())
+			{
+				var errTxt = childProcess.StdErr.ReadAllText(Encoding.UTF8);
+				var outTxt = childProcess.StdOut.ReadAllText(Encoding.UTF8);
+
+				if (string.IsNullOrEmpty(errTxt) && string.IsNullOrEmpty(outTxt))
+				{
+					Thread.Sleep(1000);
+					continue;
+				}
+
+				if (_shouldLogOut) File.AppendAllText(_stdOutLog, outTxt);
+				if (_shouldLogErr) File.AppendAllText(_stdErrLog, errTxt);
 			}
 		}
 

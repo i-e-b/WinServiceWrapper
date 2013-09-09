@@ -5,13 +5,13 @@ using NUnit.Framework;
 namespace WinServiceWrapper.Integration_Exception.Tests
 {
 	[TestFixture]
-    public class IntegrationTests_Exceptions
-    {
+	public class IntegrationTests_Exceptions
+	{
 		string _fileName;
 		Process _process;
 
 		[TestFixtureSetUp]
-		public void run_service_lifetime ()
+		public void run_service_lifetime()
 		{
 			_fileName = "dummyout.txt";
 			if (File.Exists(_fileName)) File.Delete(_fileName);
@@ -21,19 +21,19 @@ namespace WinServiceWrapper.Integration_Exception.Tests
 		}
 
 		[TestFixtureTearDown]
-		public void cleanup ()
+		public void cleanup()
 		{
 			if (File.Exists(_fileName)) File.Delete(_fileName);
 		}
 
 		[Test]
-		public void startup_passes_args_to_real_process ()
+		public void startup_passes_args_to_real_process()
 		{
 			Assert.That(File.ReadAllText(_fileName), Contains.Substring("start, withException"));
 		}
 
 		[Test]
-		public void shutdown_should_call_another_instance_with_arguments ()
+		public void shutdown_should_call_another_instance_with_arguments()
 		{
 			Assert.That(File.ReadAllText(_fileName), Contains.Substring("stop, args"));
 		}
@@ -41,11 +41,12 @@ namespace WinServiceWrapper.Integration_Exception.Tests
 
 		void Call(string target, string args)
 		{
-			_process = Process.Start(new ProcessStartInfo{
+			_process = Process.Start(new ProcessStartInfo
+			{
 				Arguments = args,
 				FileName = Path.GetFullPath(target)
 			});
 			_process.WaitForExit();
 		}
-    }
+	}
 }

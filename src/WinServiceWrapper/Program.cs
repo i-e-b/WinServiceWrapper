@@ -27,7 +27,10 @@ namespace WinServiceWrapper
 			var pauseArgs = ConfigurationManager.AppSettings["PauseCommand"];
 			var continueArgs = ConfigurationManager.AppSettings["ContinueCommand"];
 
-			// Dummy version of ourself -- just sit and wait
+			var stdOutLog = ConfigurationManager.AppSettings["StdOutLog"];
+			var stdErrLog = ConfigurationManager.AppSettings["StdErrLog"];
+
+		// Dummy version of ourself -- just sit and wait
 			if (args.FirstIs("waitForPid"))
 			{
 				var ppid = int.Parse(args[1]);
@@ -51,7 +54,7 @@ namespace WinServiceWrapper
 			{
 				x.Service<WrapperService>(s =>
 				{
-					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs));
+					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog));
 
 					s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());

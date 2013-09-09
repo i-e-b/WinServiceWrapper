@@ -16,6 +16,8 @@ namespace DummyApp
 			_fileName = "dummyout.txt";
 			File.AppendAllText(_fileName, "\r\n" + string.Join(", ", args));
 
+			Console.Error.Write("this is some sample data on standard error");
+
 			Console.WriteLine("Dummy app has started");
 
 			if (args.Length > 0 && args[0] == "stop") KillAllInstances();

@@ -30,7 +30,7 @@ namespace WinServiceWrapper
 			var stdOutLog = ConfigurationManager.AppSettings["StdOutLog"];
 			var stdErrLog = ConfigurationManager.AppSettings["StdErrLog"];
 
-		// Dummy version of ourself -- just sit and wait
+			// Dummy version of ourself -- just sit and wait
 			if (args.FirstIs("waitForPid"))
 			{
 				var ppid = int.Parse(args[1]);

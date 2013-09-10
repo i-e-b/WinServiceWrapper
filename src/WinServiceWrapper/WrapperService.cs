@@ -17,8 +17,8 @@ namespace WinServiceWrapper
 		readonly string _stopArgs;
 		readonly string _stdOutLog;
 		readonly string _stdErrLog;
-		readonly bool _shouldLogOut;
-		readonly bool _shouldLogErr;
+		bool _shouldLogOut;
+		bool _shouldLogErr;
 		volatile bool _stopping;
 
 		ProcessHost _childProcess;
@@ -36,8 +36,22 @@ namespace WinServiceWrapper
 			_stdOutLog = stdOutLog;
 			_stdErrLog = stdErrLog;
 
-			_shouldLogOut = !string.IsNullOrWhiteSpace(_stdOutLog);
-			_shouldLogErr = !string.IsNullOrWhiteSpace(_stdErrLog);
+			PrepareLogging();
+		}
+
+		void PrepareLogging()
+		{
+			_shouldLogOut = MaybeCreateDirectory(_stdOutLog);
+			_shouldLogErr = MaybeCreateDirectory(_stdErrLog);
+		}
+
+		bool MaybeCreateDirectory(string path)
+		{
+			if (string.IsNullOrWhiteSpace(path)) return false;
+
+			var logDir = Path.GetDirectoryName(Path.GetFullPath(path));
+			if (logDir != null) Directory.CreateDirectory(logDir);
+			return true;
 		}
 
 		public void Start()
@@ -211,7 +225,10 @@ namespace WinServiceWrapper
 
 		static ProcessHost Call(string exePath, string args)
 		{
-			var proc = new ProcessHost(exePath, Path.GetDirectoryName(exePath) ?? "C:\\");
+			var fullExePath = Path.GetFullPath(exePath);
+			var runningDirectory = Path.GetDirectoryName(fullExePath);
+
+			var proc = new ProcessHost(fullExePath, runningDirectory);
 			proc.Start(args);
 			return proc;
 		}

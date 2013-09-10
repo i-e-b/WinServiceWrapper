@@ -13,6 +13,9 @@ namespace DummyApp
 
 		static void Main(string[] args)
 		{
+			File.AppendAllText("C:\\temp\\info.txt", Directory.GetCurrentDirectory());
+
+
 			_fileName = "dummyout.txt";
 			File.AppendAllText(_fileName, "\r\n" + string.Join(", ", args));
 

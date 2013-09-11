@@ -20,6 +20,7 @@ namespace DummyApp
 			File.AppendAllText(_fileName, "\r\n" + string.Join(", ", args));
 
 			Console.Error.Write("this is some sample data on standard error");
+			Console.Error.Write(Environment.UserDomainName + "\\" + Environment.UserName);
 
 			Console.WriteLine("Dummy app has started");
 

@@ -69,7 +69,14 @@ namespace WinServiceWrapper
 					s.WhenContinued(tc => tc.Continue());
 
 				});
-				x.RunAsNetworkService();
+				if (childCreds.IsValid())
+				{
+					x.RunAs(childCreds.Domain + "\\" + childCreds.UserName, childCreds.Password);
+				}
+				else
+				{
+					x.RunAsLocalService();
+				}
 
 				x.EnablePauseAndContinue();
 				x.EnableServiceRecovery(sr => sr.RestartService(0));

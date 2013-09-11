@@ -170,11 +170,13 @@ namespace WinServiceWrapper
 				+ exception.StackTrace,
 				EventLogEntryType.Error);
 		}
+
 		void WriteChildFailure(string data)
 		{
 			var log = CheckSource("Windows Service Wrapper: " + _displayName);
 			EventLog.WriteEntry(log, "Child process failure: " + data, EventLogEntryType.Error);
 		}
+
 		string CheckSource(string name)
 		{
 			if (EventLog.SourceExists(name)) return name;
@@ -200,7 +202,7 @@ namespace WinServiceWrapper
 
 			WriteChildFailure("error code: " + _childProcess.ExitCode());
 			KillDummy();
-			Environment.Exit(_childProcess.ExitCode());
+			Environment.Exit(_childProcess.ExitCode()); // We die, so the service manager will start us up again.
 		}
 
 		void KillDummy()

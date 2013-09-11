@@ -62,7 +62,8 @@ namespace WinServiceWrapper
 					s.WhenContinued(tc => tc.Continue());
 
 				});
-				x.RunAsLocalSystem();
+				x.RunAsNetworkService();
+				//x.RunAs("DEVVIRTUAL-PC\\exampleUser", "exampleUser");
 
 				x.EnablePauseAndContinue();
 				x.EnableServiceRecovery(sr => sr.RestartService(0));

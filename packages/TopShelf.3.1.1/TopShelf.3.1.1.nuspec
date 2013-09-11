@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>TopShelf</id>
-    <version>3.1.0</version>
+    <version>3.1.1</version>
     <title>Topshelf</title>
     <authors>Chris Patterson,  Dru Sellers,  Travis Smith</authors>
     <owners>Chris Patterson,  Dru Sellers,  Travis Smith</owners>
@@ -15,8 +15,5 @@
     <releaseNotes />
     <copyright />
     <language>en-US</language>
-    <references>
-      <reference file="Topshelf.dll" />
-    </references>
   </metadata>
 </package>

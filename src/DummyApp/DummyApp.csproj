@@ -32,8 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RunProcess">
-      <HintPath>..\..\packages\RunProcess.1.0.1\lib\net40\RunProcess.dll</HintPath>
+    <Reference Include="RunProcess, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\RunProcess.1.0.2\lib\net40\RunProcess.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

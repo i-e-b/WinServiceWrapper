@@ -228,6 +228,18 @@
             Arguments will be split and passed to the child by Windows APIs
             </summary>
         </member>
+        <member name="M:RunProcess.ProcessHost.StartAsAnotherUser(System.String,System.String,System.String,System.String)">
+            <summary>
+            Start the process with an argument string, impersonating another user
+            with the supplied credentials.
+            Arguments will be split and passed to the child by Windows APIs.
+            Password is sent in the clear... caution!
+            </summary>
+            <param name="domain">Windows domain that will validate the user. This may be null</param>
+            <param name="user">Name of the account to impersonate. If domain is null, should use user@domain style.</param>
+            <param name="password">Clear text password of user account. Careful!</param>
+            <param name="arguments">Arguments to supply to the process</param>
+        </member>
         <member name="M:RunProcess.ProcessHost.IsAlive">
             <summary>
             True if child process is still running. False if the child has exited.

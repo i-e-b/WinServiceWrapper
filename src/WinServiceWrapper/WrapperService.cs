@@ -17,6 +17,7 @@ namespace WinServiceWrapper
 		readonly string _stopArgs;
 		readonly string _stdOutLog;
 		readonly string _stdErrLog;
+		readonly UserCredentials _childUser;
 		bool _shouldLogOut;
 		bool _shouldLogErr;
 		volatile bool _stopping;
@@ -25,7 +26,7 @@ namespace WinServiceWrapper
 		ProcessHost _dummyProcess;
 
 		public WrapperService(string displayName, string target, string startArgs, string pauseArgs,
-			string continueArgs, string stopArgs, string stdOutLog, string stdErrLog)
+			string continueArgs, string stopArgs, string stdOutLog, string stdErrLog, UserCredentials childUser)
 		{
 			_displayName = displayName;
 			_target = target;
@@ -35,6 +36,7 @@ namespace WinServiceWrapper
 			_stopArgs = stopArgs;
 			_stdOutLog = stdOutLog;
 			_stdErrLog = stdErrLog;
+			_childUser = childUser;
 
 			PrepareLogging();
 		}
@@ -62,11 +64,11 @@ namespace WinServiceWrapper
 				if (_startArgs.Contains("{0}"))
 				{
 					_dummyProcess = Call(Process.GetCurrentProcess().MainModule.FileName, "waitForPid " + Process.GetCurrentProcess().Id);
-					_childProcess = Call(_target, string.Format(_startArgs, _dummyProcess.ProcessId()));
+					_childProcess = CallAsChildUser(_target, string.Format(_startArgs, _dummyProcess.ProcessId()));
 				}
 				else
 				{
-					_childProcess = Call(_target, _startArgs);
+					_childProcess = CallAsChildUser(_target, _startArgs);
 				}
 
 				var t = new Thread(() => MonitorChild(_childProcess));
@@ -232,6 +234,24 @@ namespace WinServiceWrapper
 
 			var proc = new ProcessHost(fullExePath, runningDirectory);
 			proc.Start(args);
+			return proc;
+		}
+
+		ProcessHost CallAsChildUser(string exePath, string args)
+		{
+			var fullExePath = Path.GetFullPath(exePath);
+			var runningDirectory = Path.GetDirectoryName(fullExePath);
+
+			var proc = new ProcessHost(fullExePath, runningDirectory);
+			if (_childUser.IsValid())
+			{
+				proc.StartAsAnotherUser(_childUser.Domain, _childUser.UserName, _childUser.Password,
+					args);
+			}
+			else
+			{
+				proc.Start(args);
+			}
 			return proc;
 		}
 

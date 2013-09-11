@@ -12,8 +12,9 @@ namespace WinServiceWrapper
 	{
 		public static void Main(string[] args)
 		{
-			var name = ConfigurationManager.AppSettings["Name"];
-			var target = ConfigurationManager.AppSettings["TargetExecutable"];
+			var settings = ConfigurationManager.AppSettings;
+			var name = settings["Name"];
+			var target = settings["TargetExecutable"];
 
 			if (string.IsNullOrWhiteSpace(name))
 				throw new Exception("You must name your service in the App.Config file, key = \"Name\"");
@@ -21,14 +22,20 @@ namespace WinServiceWrapper
 				throw new Exception("You must provide a target executable to wrap, key= \"TargetExecutable\"");
 
 			var safeName = MakeSafe(name);
-			var description = ConfigurationManager.AppSettings["Description"];
-			var startArgs = ConfigurationManager.AppSettings["StartCommand"];
-			var stopArgs = ConfigurationManager.AppSettings["StopCommand"];
-			var pauseArgs = ConfigurationManager.AppSettings["PauseCommand"];
-			var continueArgs = ConfigurationManager.AppSettings["ContinueCommand"];
+			var description = settings["Description"];
+			var startArgs = settings["StartCommand"];
+			var stopArgs = settings["StopCommand"];
+			var pauseArgs = settings["PauseCommand"];
+			var continueArgs = settings["ContinueCommand"];
 
-			var stdOutLog = ConfigurationManager.AppSettings["StdOutLog"];
-			var stdErrLog = ConfigurationManager.AppSettings["StdErrLog"];
+			var stdOutLog = settings["StdOutLog"];
+			var stdErrLog = settings["StdErrLog"];
+			
+			var childCreds = new UserCredentials{
+				Domain = settings["RunAsDomain"],
+				Password = settings["RunAsPassword"],
+				UserName = settings["RunAsUser"]
+			};
 
 			// Dummy version of ourself -- just sit and wait
 			if (args.FirstIs("waitForPid"))
@@ -54,7 +61,7 @@ namespace WinServiceWrapper
 			{
 				x.Service<WrapperService>(s =>
 				{
-					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog));
+					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog, childCreds));
 
 					s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
@@ -63,7 +70,6 @@ namespace WinServiceWrapper
 
 				});
 				x.RunAsNetworkService();
-				//x.RunAs("DEVVIRTUAL-PC\\exampleUser", "exampleUser");
 
 				x.EnablePauseAndContinue();
 				x.EnableServiceRecovery(sr => sr.RestartService(0));

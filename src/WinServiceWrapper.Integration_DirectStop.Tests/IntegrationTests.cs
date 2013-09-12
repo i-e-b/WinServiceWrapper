@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
 using NUnit.Framework;
@@ -62,6 +63,7 @@ namespace WinServiceWrapper.Integration.Tests
 		[Test]
 		public void writes_logs ()
 		{
+			Console.Write(File.ReadAllText(@"C:\Temp\winserwrap_tests_err.txt"));
 			Assert.That(File.ReadAllText(@"C:\Temp\winserwrap_tests_out.txt"), Is.Not.Empty);
 			Assert.That(File.ReadAllText(@"C:\Temp\winserwrap_tests_err.txt"), Is.Not.Empty);
 		}

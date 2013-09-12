@@ -24,6 +24,7 @@ namespace WinServiceWrapper
 
 		ProcessHost _childProcess;
 		ProcessHost _dummyProcess;
+		Thread _monitorThread;
 
 		public WrapperService(string displayName, string target, string startArgs, string pauseArgs,
 			string continueArgs, string stopArgs, string stdOutLog, string stdErrLog, UserCredentials childUser)
@@ -47,7 +48,7 @@ namespace WinServiceWrapper
 			_shouldLogErr = MaybeCreateDirectory(_stdErrLog);
 		}
 
-		bool MaybeCreateDirectory(string path)
+		static bool MaybeCreateDirectory(string path)
 		{
 			if (string.IsNullOrWhiteSpace(path)) return false;
 
@@ -71,12 +72,15 @@ namespace WinServiceWrapper
 					_childProcess = CallAsChildUser(_target, _startArgs);
 				}
 
-				var t = new Thread(() => MonitorChild(_childProcess));
-				t.Start();
+				if (_monitorThread == null || !_monitorThread.IsAlive)
+				{
+					_monitorThread = new Thread(() => MonitorChild(_childProcess)) { IsBackground = true };
+					_monitorThread.Start();
+				}
 
 				if (_shouldLogOut || _shouldLogErr)
 				{
-					var tlogs = new Thread(() => WriteLogs(_target, _childProcess)) {IsBackground = true};
+					var tlogs = new Thread(() => WriteLogs(_childProcess)) {IsBackground = true};
 					tlogs.Start();
 				}
 			}
@@ -86,12 +90,12 @@ namespace WinServiceWrapper
 			}
 		}
 
-		void WriteLogs(string process, ProcessHost childProcess)
+		void WriteLogs(ProcessHost childProcess)
 		{
-			while (!_stopping && childProcess.IsAlive())
+			while (!_stopping && IsOk(childProcess))
 			{
-				var errTxt = childProcess.StdErr.ReadAllText(Encoding.UTF8);
-				var outTxt = childProcess.StdOut.ReadAllText(Encoding.UTF8);
+				var errTxt = childProcess.StdErr.ReadLine(Encoding.UTF8, TimeSpan.FromSeconds(1));
+				var outTxt = childProcess.StdOut.ReadLine(Encoding.UTF8, TimeSpan.FromSeconds(1));
 
 				if (string.IsNullOrEmpty(errTxt) && string.IsNullOrEmpty(outTxt))
 				{
@@ -196,7 +200,7 @@ namespace WinServiceWrapper
 
 		void MonitorChild(ProcessHost child)
 		{
-			while (!_stopping && child.IsAlive())
+			while (!_stopping && IsOk(child))
 			{
 				Thread.Sleep(250);
 			}
@@ -255,9 +259,9 @@ namespace WinServiceWrapper
 			return proc;
 		}
 
-		static bool IsOk(ProcessHost dummyProcess)
+		static bool IsOk(ProcessHost proc)
 		{
-			return dummyProcess != null && dummyProcess.IsAlive();
+			return proc != null && proc.IsAlive();
 		}
 	}
 }

@@ -21,6 +21,7 @@ namespace DummyApp
 
 			Console.Error.Write("this is some sample data on standard error");
 			Console.Error.Write(Environment.UserDomainName + "\\" + Environment.UserName);
+			Console.Error.Write(Process.GetCurrentProcess().BasePriority);
 
 			Console.WriteLine("Dummy app has started");
 

@@ -13,7 +13,7 @@ namespace WinServiceWrapper.Integration_Exception.Tests
 		[TestFixtureSetUp]
 		public void run_service_lifetime()
 		{
-			_fileName = "dummyout.txt";
+			_fileName = @"C:\Temp\dummyout.txt";
 			if (File.Exists(_fileName)) File.Delete(_fileName);
 			Call("WinServiceWrapper.exe", "install start");
 

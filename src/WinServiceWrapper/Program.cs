@@ -61,7 +61,7 @@ namespace WinServiceWrapper
 			{
 				x.Service<WrapperService>(s =>
 				{
-					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog, childCreds));
+					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog));
 
 					s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
@@ -69,15 +69,9 @@ namespace WinServiceWrapper
 					s.WhenContinued(tc => tc.Continue());
 
 				});
-				if (childCreds.IsValid())
-				{
-					x.RunAs(childCreds.Domain + "\\" + childCreds.UserName, childCreds.Password);
-				}
-				else
-				{
-					x.RunAsLocalService();
-				}
-
+				
+				x.RunAsLocalService();
+				
 				x.EnablePauseAndContinue();
 				x.EnableServiceRecovery(sr => sr.RestartService(0));
 

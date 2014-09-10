@@ -31,12 +31,6 @@ namespace WinServiceWrapper
 			var stdOutLog = settings["StdOutLog"];
 			var stdErrLog = settings["StdErrLog"];
 			
-			var childCreds = new UserCredentials{
-				Domain = settings["RunAsDomain"],
-				Password = settings["RunAsPassword"],
-				UserName = settings["RunAsUser"]
-			};
-
 			// Dummy version of ourself -- just sit and wait
 			if (args.FirstIs("waitForPid"))
 			{

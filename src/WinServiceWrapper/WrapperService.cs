@@ -17,7 +17,6 @@ namespace WinServiceWrapper
 		readonly string _stopArgs;
 		readonly string _stdOutLog;
 		readonly string _stdErrLog;
-		readonly UserCredentials _childUser;
 		bool _shouldLogOut;
 		bool _shouldLogErr;
 		volatile bool _stopping;
@@ -26,8 +25,7 @@ namespace WinServiceWrapper
 		ProcessHost _dummyProcess;
 		Thread _monitorThread;
 
-		public WrapperService(string displayName, string target, string startArgs, string pauseArgs,
-			string continueArgs, string stopArgs, string stdOutLog, string stdErrLog, UserCredentials childUser)
+		public WrapperService(string displayName, string target, string startArgs, string pauseArgs, string continueArgs, string stopArgs, string stdOutLog, string stdErrLog)
 		{
 			_displayName = displayName;
 			_target = target;
@@ -37,7 +35,6 @@ namespace WinServiceWrapper
 			_stopArgs = stopArgs;
 			_stdOutLog = stdOutLog;
 			_stdErrLog = stdErrLog;
-			_childUser = childUser;
 
 			PrepareLogging();
 		}
@@ -247,15 +244,9 @@ namespace WinServiceWrapper
 			var runningDirectory = Path.GetDirectoryName(fullExePath);
 
 			var proc = new ProcessHost(fullExePath, runningDirectory);
-			if (_childUser.IsValid())
-			{
-				proc.StartAsAnotherUser(_childUser.Domain, _childUser.UserName, _childUser.Password,
-					args);
-			}
-			else
-			{
-				proc.Start(args);
-			}
+			
+			proc.Start(args);
+
 			return proc;
 		}
 

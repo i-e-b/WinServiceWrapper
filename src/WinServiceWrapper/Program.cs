@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
-using RunProcess;
 using Topshelf;
 
 namespace WinServiceWrapper
@@ -32,12 +31,6 @@ namespace WinServiceWrapper
 			var stdOutLog = settings["StdOutLog"];
 			var stdErrLog = settings["StdErrLog"];
 			
-			var childCreds = new UserCredentials{
-				Domain = settings["RunAsDomain"],
-				Password = settings["RunAsPassword"],
-				UserName = settings["RunAsUser"]
-			};
-
 			// Dummy version of ourself -- just sit and wait
 			if (args.FirstIs("waitForPid"))
 			{
@@ -62,7 +55,7 @@ namespace WinServiceWrapper
 			{
 				x.Service<WrapperService>(s =>
 				{
-					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog, childCreds));
+					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog));
 
 					s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
@@ -70,15 +63,9 @@ namespace WinServiceWrapper
 					s.WhenContinued(tc => tc.Continue());
 
 				});
-				if (childCreds.IsValid())
-				{
-					x.RunAs(childCreds.Domain + "\\" + childCreds.UserName, childCreds.Password);
-				}
-				else
-				{
-					x.RunAsLocalService();
-				}
-
+				
+				x.RunAsLocalService();
+				
 				x.EnablePauseAndContinue();
 				x.EnableServiceRecovery(sr => sr.RestartService(0));
 

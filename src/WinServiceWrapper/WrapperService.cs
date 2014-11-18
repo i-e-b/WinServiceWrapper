@@ -111,8 +111,12 @@ namespace WinServiceWrapper
 		{
 			if (_stopping) return;
 			_stopping = true;
+            if (forceKill) {
+                ForceKillImmediate();
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(_stopArgs)) StopWithCircularMonitoring();
-            else if (forceKill) ForceKillImmediate();
             else StopWithArguments();
 		}
 
@@ -126,8 +130,11 @@ namespace WinServiceWrapper
 		{
 			try
 			{
-				using (var proc = Call(_target, _stopArgs))
-					proc.WaitForExit(TimeSpan.FromMinutes(5));
+                KillDummy();
+                using (var proc = Call(_target, _stopArgs))
+                {
+                    proc.WaitForExit(TimeSpan.FromMinutes(5));
+                }
 				WaitForExit_ForceKillAfter90Seconds();
 			}
 			catch (Exception ex)

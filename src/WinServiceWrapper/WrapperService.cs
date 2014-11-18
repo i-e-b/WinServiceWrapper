@@ -107,12 +107,13 @@ namespace WinServiceWrapper
 			}
 		}
 
-		public void Stop()
+		public void Stop(bool forceKill)
 		{
 			if (_stopping) return;
 			_stopping = true;
-			if (string.IsNullOrWhiteSpace(_stopArgs)) StopWithCircularMonitoring();
-			else StopWithArguments();
+            if (string.IsNullOrWhiteSpace(_stopArgs)) StopWithCircularMonitoring();
+            else if (forceKill) ForceKillImmediate();
+            else StopWithArguments();
 		}
 
 		void StopWithCircularMonitoring()
@@ -229,6 +230,14 @@ namespace WinServiceWrapper
 			_childProcess.Dispose();
 			_childProcess = null;
 		}
+
+        void ForceKillImmediate()
+        {
+            if (!IsOk(_childProcess)) return;
+            _childProcess.Kill();
+            _childProcess.Dispose();
+            _childProcess = null;
+        }
 
         string InitialWorkingDirectory(string targetPath)
         {

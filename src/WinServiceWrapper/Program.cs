@@ -28,6 +28,7 @@ namespace WinServiceWrapper
 			var stopArgs = settings["StopCommand"];
 			var pauseArgs = settings["PauseCommand"];
 			var continueArgs = settings["ContinueCommand"];
+            var forceKill = (settings["KillTargetOnStop"]??"").ToLowerInvariant() == "true";
 
 			var stdOutLog = settings["StdOutLog"];
 			var stdErrLog = settings["StdErrLog"];
@@ -59,7 +60,7 @@ namespace WinServiceWrapper
                     s.ConstructUsing(hostSettings => new WrapperService(name, target, workingDir, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog));
 
 					s.WhenStarted(tc => tc.Start());
-					s.WhenStopped(tc => tc.Stop());
+					s.WhenStopped(tc => tc.Stop(forceKill));
 					s.WhenPaused(tc => tc.Pause());
 					s.WhenContinued(tc => tc.Continue());
 

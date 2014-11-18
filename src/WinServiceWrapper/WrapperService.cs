@@ -11,7 +11,8 @@ namespace WinServiceWrapper
 	{
 		readonly string _displayName;
 		readonly string _target;
-		readonly string _startArgs;
+	    readonly string _workingDir;
+	    readonly string _startArgs;
 		readonly string _pauseArgs;
 		readonly string _continueArgs;
 		readonly string _stopArgs;
@@ -25,11 +26,12 @@ namespace WinServiceWrapper
 		ProcessHost _dummyProcess;
 		Thread _monitorThread;
 
-		public WrapperService(string displayName, string target, string startArgs, string pauseArgs, string continueArgs, string stopArgs, string stdOutLog, string stdErrLog)
+		public WrapperService(string displayName, string target, string workingDir, string startArgs, string pauseArgs, string continueArgs, string stopArgs, string stdOutLog, string stdErrLog)
 		{
 			_displayName = displayName;
 			_target = target;
-			_startArgs = startArgs;
+		    _workingDir = workingDir;
+		    _startArgs = startArgs;
 			_pauseArgs = pauseArgs;
 			_continueArgs = continueArgs;
 			_stopArgs = stopArgs;
@@ -180,7 +182,7 @@ namespace WinServiceWrapper
 			EventLog.WriteEntry(log, "Child process failure: " + data, EventLogEntryType.Error);
 		}
 
-		string CheckSource(string name)
+	    static string CheckSource(string name)
 		{
 			if (EventLog.SourceExists(name)) return name;
 
@@ -228,10 +230,16 @@ namespace WinServiceWrapper
 			_childProcess = null;
 		}
 
-		static ProcessHost Call(string exePath, string args)
+        string InitialWorkingDirectory(string targetPath)
+        {
+            if (!string.IsNullOrWhiteSpace(_workingDir)) return _workingDir;
+            return Path.GetDirectoryName(targetPath);
+        }
+
+		ProcessHost Call(string exePath, string args)
 		{
 			var fullExePath = Path.GetFullPath(exePath);
-			var runningDirectory = Path.GetDirectoryName(fullExePath);
+            var runningDirectory = InitialWorkingDirectory(fullExePath);
 
 			var proc = new ProcessHost(fullExePath, runningDirectory);
 			proc.Start(args);
@@ -240,8 +248,8 @@ namespace WinServiceWrapper
 
 		ProcessHost CallAsChildUser(string exePath, string args)
 		{
-			var fullExePath = Path.GetFullPath(exePath);
-			var runningDirectory = Path.GetDirectoryName(fullExePath);
+            var fullExePath = Path.GetFullPath(exePath);
+            var runningDirectory = InitialWorkingDirectory(fullExePath);
 
 			var proc = new ProcessHost(fullExePath, runningDirectory);
 			

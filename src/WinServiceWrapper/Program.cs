@@ -15,6 +15,7 @@ namespace WinServiceWrapper
 			var settings = ConfigurationManager.AppSettings;
 			var name = settings["Name"];
 			var target = settings["TargetExecutable"];
+            var workingDir = settings["InitialWorkingDirectory"];
 
 			if (string.IsNullOrWhiteSpace(name))
 				throw new Exception("You must name your service in the App.Config file, key = \"Name\"");
@@ -55,7 +56,7 @@ namespace WinServiceWrapper
 			{
 				x.Service<WrapperService>(s =>
 				{
-					s.ConstructUsing(hostSettings => new WrapperService(name, target, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog));
+                    s.ConstructUsing(hostSettings => new WrapperService(name, target, workingDir, startArgs, pauseArgs, continueArgs, stopArgs, stdOutLog, stdErrLog));
 
 					s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
@@ -101,14 +102,6 @@ namespace WinServiceWrapper
 				sb.Append(c);
 			}
 			return sb.ToString();
-		}
-	}
-
-	public static class Ext
-	{
-		public static bool FirstIs(this string[] args, string target)
-		{
-			return string.Equals(args.FirstOrDefault(), target, StringComparison.InvariantCultureIgnoreCase);
 		}
 	}
 }
